@@ -1,0 +1,1972 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Smart Apprentice LMS - Production Deployment Analysis | OCA</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          sans-serif;
+        line-height: 1.6;
+        color: #1e293b;
+        overflow: hidden;
+      }
+
+      .slideshow-container {
+        position: relative;
+        width: 100%;
+        height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        background: linear-gradient(
+          135deg,
+          #0369a1 0%,
+          #0284c7 50%,
+          #06b6d4 100%
+        );
+      }
+
+      /* Pacific Wave Pattern Background */
+      .slideshow-container::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0.05;
+        z-index: 1;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 20'%3E%3Cpath d='M0 10 Q 25 0, 50 10 T 100 10 L 100 20 L 0 20 Z' fill='%23ffffff'/%3E%3C/svg%3E");
+        background-repeat: repeat-x;
+        animation: wave-flow 15s linear infinite;
+      }
+
+      @keyframes wave-flow {
+        0% {
+          background-position-x: 0;
+        }
+        100% {
+          background-position-x: 100px;
+        }
+      }
+
+      /* Traditional Pacific Pattern Elements */
+      .pacific-pattern {
+        position: absolute;
+        width: 80px;
+        height: 80px;
+        opacity: 0.03;
+        background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='40' fill='none' stroke='%23ffffff' stroke-width='2'/%3E%3Ccircle cx='50' cy='50' r='25' fill='none' stroke='%23ffffff' stroke-width='1'/%3E%3Cpath d='M50,10 L90,50 L50,90 L10,50 Z' fill='none' stroke='%23ffffff' stroke-width='1'/%3E%3C/svg%3E")
+          no-repeat center;
+        background-size: contain;
+        z-index: 1;
+      }
+
+      .pacific-pattern.pattern-1 {
+        top: 10%;
+        right: 15%;
+        animation: float-rotate 20s ease-in-out infinite;
+      }
+
+      .pacific-pattern.pattern-2 {
+        bottom: 20%;
+        left: 10%;
+        animation: float-rotate 25s ease-in-out infinite reverse;
+      }
+
+      .pacific-pattern.pattern-3 {
+        top: 60%;
+        right: 5%;
+        animation: float-rotate 30s ease-in-out infinite;
+      }
+
+      @keyframes float-rotate {
+        0%,
+        100% {
+          transform: translateY(0) rotate(0deg);
+          opacity: 0.03;
+        }
+        50% {
+          transform: translateY(-20px) rotate(180deg);
+          opacity: 0.06;
+        }
+      }
+
+      .slide {
+        display: none;
+        width: 95%;
+        max-width: 1200px;
+        background: #ffffff;
+        border-radius: 24px;
+        padding: 50px;
+        position: relative;
+        overflow-y: auto;
+        max-height: 85vh;
+        z-index: 10;
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+      }
+
+      .slide.active {
+        display: block;
+        animation: slideIn 0.5s ease-out;
+      }
+
+      @keyframes slideIn {
+        from {
+          opacity: 0;
+          transform: translateY(30px) scale(0.98);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0) scale(1);
+        }
+      }
+
+      .slide::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #0369a1, #0284c7, #06b6d4);
+        border-radius: 24px 24px 0 0;
+      }
+
+      h1 {
+        font-size: 3.2em;
+        color: #0f172a;
+        text-align: center;
+        margin-bottom: 15px;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        position: relative;
+      }
+
+      h1::after {
+        content: "🌊";
+        position: absolute;
+        right: -50px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 0.6em;
+        opacity: 0.7;
+      }
+
+      h2 {
+        font-size: 2.4em;
+        color: #0f172a;
+        margin-bottom: 30px;
+        text-align: center;
+        font-weight: 700;
+        letter-spacing: -0.01em;
+      }
+
+      h3 {
+        font-size: 1.4em;
+        color: #0f172a;
+        margin: 25px 0 15px 0;
+        font-weight: 600;
+        border-bottom: 2px solid #e2e8f0;
+        padding-bottom: 8px;
+        position: relative;
+      }
+
+      h3::before {
+        content: "";
+        position: absolute;
+        bottom: -2px;
+        left: 0;
+        width: 60px;
+        height: 2px;
+        background: linear-gradient(90deg, #0369a1, #0284c7);
+      }
+
+      h4 {
+        font-size: 1.2em;
+        color: #0f172a;
+        margin-bottom: 10px;
+        font-weight: 600;
+      }
+
+      p,
+      li {
+        font-size: 1.05em;
+        line-height: 1.7;
+        margin-bottom: 12px;
+        color: #475569;
+      }
+
+      .oca-badge {
+        display: inline-block;
+        background: linear-gradient(135deg, #fef3c7, #fed7aa);
+        color: #92400e;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        margin-bottom: 20px;
+        border: 1px solid #fbbf24;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .oca-badge::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(255, 255, 255, 0.3),
+          transparent
+        );
+        animation: shimmer 3s infinite;
+      }
+
+      @keyframes shimmer {
+        0% {
+          left: -100%;
+        }
+        100% {
+          left: 100%;
+        }
+      }
+
+      .fact-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 25px;
+        margin: 30px 0;
+      }
+
+      .fact-card {
+        background: #f8fafc;
+        padding: 25px;
+        border-radius: 16px;
+        border-left: 4px solid #0369a1;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      }
+
+      .fact-card::before {
+        content: "";
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(
+          circle,
+          rgba(6, 182, 212, 0.1) 0%,
+          transparent 70%
+        );
+        opacity: 0;
+        transition: all 0.3s ease;
+        transform: scale(0);
+      }
+
+      .fact-card:hover::before {
+        opacity: 1;
+        transform: scale(1);
+      }
+
+      .fact-card:hover {
+        background: white;
+        box-shadow: 0 12px 30px rgba(3, 105, 161, 0.15);
+        border-left-color: #06b6d4;
+        transform: translateY(-5px);
+      }
+
+      .fact-card h4 {
+        color: #0f172a;
+        font-size: 1.2em;
+        margin-bottom: 10px;
+        font-weight: 600;
+      }
+
+      .fact-card p {
+        color: #475569;
+        font-size: 1em;
+        line-height: 1.6;
+        margin: 0;
+      }
+
+      .cost-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 25px 0;
+        background: #ffffff;
+        border-radius: 12px;
+        overflow: hidden;
+        font-size: 0.95em;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+      }
+
+      .cost-table th {
+        background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+        color: #0f172a;
+        padding: 18px 20px;
+        text-align: left;
+        font-weight: 700;
+        font-size: 0.9em;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-bottom: 2px solid #0369a1;
+      }
+
+      .cost-table td {
+        padding: 16px 20px;
+        border-bottom: 1px solid #f1f5f9;
+        color: #475569;
+      }
+
+      .cost-table tr:last-child td {
+        border-bottom: none;
+        font-weight: 700;
+        background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+        color: #0f172a;
+        font-size: 1.05em;
+      }
+
+      .cost-table tr:nth-child(even) {
+        background: #fafbfc;
+      }
+
+      .cost-table th:last-child,
+      .cost-table td:last-child {
+        text-align: right;
+      }
+
+      .warning-box {
+        background: linear-gradient(135deg, #fff9e6, #fef3c7);
+        border: 2px solid #fbbf24;
+        border-left: 6px solid #f59e0b;
+        border-radius: 12px;
+        padding: 25px;
+        margin: 25px 0;
+        position: relative;
+      }
+
+      .warning-box::before {
+        content: "⚠️";
+        position: absolute;
+        top: 15px;
+        right: 20px;
+        font-size: 1.5em;
+        opacity: 0.7;
+      }
+
+      .warning-box h3 {
+        color: #d68910;
+        margin: 0 0 12px 0;
+        border: none;
+        padding: 0;
+        font-size: 1.2em;
+      }
+
+      .warning-box p {
+        color: #7d6608;
+        margin: 0;
+        font-weight: 500;
+      }
+
+      .info-box {
+        background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+        border: 2px solid #0284c7;
+        border-left: 6px solid #0369a1;
+        border-radius: 12px;
+        padding: 25px;
+        margin: 25px 0;
+        position: relative;
+      }
+
+      .info-box::before {
+        content: "🌺";
+        position: absolute;
+        top: 15px;
+        right: 20px;
+        font-size: 1.5em;
+        opacity: 0.7;
+      }
+
+      .info-box h3 {
+        color: #0369a1;
+        margin: 0 0 12px 0;
+        border: none;
+        padding: 0;
+        font-size: 1.2em;
+      }
+
+      .info-box p {
+        color: #1e40af;
+        margin: 0;
+        font-weight: 500;
+      }
+
+      .navigation-hint {
+        position: fixed;
+        bottom: 25px;
+        right: 25px;
+        background: rgba(15, 23, 42, 0.9);
+        color: white;
+        padding: 12px 18px;
+        border-radius: 25px;
+        font-size: 0.85em;
+        z-index: 1000;
+        font-weight: 500;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .slide-counter {
+        position: fixed;
+        bottom: 25px;
+        left: 25px;
+        background: rgba(15, 23, 42, 0.9);
+        color: white;
+        padding: 12px 18px;
+        border-radius: 25px;
+        font-size: 0.85em;
+        z-index: 1000;
+        font-weight: 600;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .architecture-diagram {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: 35px 0;
+        flex-wrap: wrap;
+        gap: 30px;
+      }
+
+      .arch-box {
+        background: linear-gradient(135deg, #f8fafc, #ffffff);
+        border: 2px solid #e2e8f0;
+        border-radius: 16px;
+        padding: 25px 20px;
+        text-align: center;
+        min-width: 160px;
+        flex: 1;
+        max-width: 200px;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .arch-box::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, #0369a1, #0284c7, #06b6d4);
+      }
+
+      .arch-box:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 30px rgba(3, 105, 161, 0.15);
+        border-color: #0369a1;
+      }
+
+      .arch-box h4 {
+        color: #0f172a;
+        font-size: 1.1em;
+        margin-bottom: 8px;
+        font-weight: 700;
+      }
+
+      .arch-box p {
+        color: #475569;
+        font-size: 0.9em;
+        margin: 0;
+      }
+
+      .arrow {
+        font-size: 1.5em;
+        color: #0369a1;
+        align-self: center;
+        font-weight: 300;
+        animation: pulse 2s ease-in-out infinite;
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.6;
+        }
+      }
+
+      .scale-comparison {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 25px;
+        margin: 25px 0;
+      }
+
+      .scale-card {
+        background: linear-gradient(135deg, #f8fafc, #ffffff);
+        border: 2px solid #e2e8f0;
+        border-radius: 16px;
+        padding: 25px;
+        text-align: center;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .scale-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: #e2e8f0;
+      }
+
+      .scale-card.current::before {
+        background: linear-gradient(90deg, #10b981, #34d399);
+      }
+
+      .scale-card.current {
+        border-color: #10b981;
+        background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+      }
+
+      .scale-card.future::before {
+        background: linear-gradient(90deg, #ef4444, #f87171);
+      }
+
+      .scale-card.future {
+        border-color: #ef4444;
+        background: linear-gradient(135deg, #fef2f2, #fee2e2);
+      }
+
+      .scale-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+      }
+
+      .scale-card h4 {
+        color: #0f172a;
+        margin-bottom: 12px;
+        font-size: 1.2em;
+        font-weight: 700;
+      }
+
+      .scale-card p {
+        color: #475569;
+        font-size: 1em;
+        margin: 8px 0;
+      }
+
+      .technical-list {
+        columns: 2;
+        column-gap: 40px;
+        list-style: none;
+        padding: 0;
+        margin: 20px 0;
+      }
+
+      .technical-list li {
+        break-inside: avoid;
+        padding: 10px 0;
+        border-bottom: 1px solid #f1f5f9;
+        color: #475569;
+        font-size: 0.95em;
+        position: relative;
+        padding-left: 20px;
+      }
+
+      .technical-list li:before {
+        content: "🔹";
+        position: absolute;
+        left: 0;
+        color: #0369a1;
+      }
+
+      ul {
+        padding-left: 25px;
+        margin: 15px 0;
+      }
+
+      ul li {
+        margin-bottom: 8px;
+        color: #475569;
+        font-size: 0.95em;
+        position: relative;
+      }
+
+      ul li::marker {
+        color: #0369a1;
+      }
+
+      strong {
+        color: #0f172a;
+        font-weight: 600;
+      }
+
+      /* OCA Branding Elements */
+      .oca-title {
+        text-align: center;
+        margin-bottom: 30px;
+      }
+
+      .oca-subtitle {
+        color: #0369a1;
+        font-size: 1.2em;
+        font-weight: 600;
+        text-align: center;
+        margin-bottom: 20px;
+      }
+
+      .pasifika-note {
+        background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+        border: 1px solid #0284c7;
+        border-radius: 12px;
+        padding: 15px 20px;
+        margin: 20px 0;
+        text-align: center;
+        font-style: italic;
+        color: #0369a1;
+        font-weight: 500;
+      }
+
+      .cost-calculator {
+        background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+        border: 2px solid #0284c7;
+        border-radius: 16px;
+        padding: 30px;
+        margin: 30px 0;
+      }
+
+      .calculator-header {
+        text-align: center;
+        margin-bottom: 25px;
+      }
+
+      .calculator-header h3 {
+        color: #0369a1;
+        margin-bottom: 10px;
+        border: none;
+        padding: 0;
+      }
+
+      .user-slider-container {
+        margin: 25px 0;
+      }
+
+      .user-slider {
+        width: 100%;
+        height: 8px;
+        border-radius: 5px;
+        background: linear-gradient(
+          to right,
+          #10b981 0%,
+          #f59e0b 50%,
+          #ef4444 100%
+        );
+        outline: none;
+        -webkit-appearance: none;
+        margin: 15px 0;
+      }
+
+      .user-slider::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 25px;
+        height: 25px;
+        border-radius: 50%;
+        background: #0369a1;
+        cursor: pointer;
+        box-shadow: 0 4px 8px rgba(3, 105, 161, 0.3);
+        border: 3px solid white;
+      }
+
+      .user-slider::-moz-range-thumb {
+        width: 25px;
+        height: 25px;
+        border-radius: 50%;
+        background: #0369a1;
+        cursor: pointer;
+        border: 3px solid white;
+        box-shadow: 0 4px 8px rgba(3, 105, 161, 0.3);
+      }
+
+      .slider-labels {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.85em;
+        color: #64748b;
+        margin-top: 5px;
+      }
+
+      .current-users {
+        text-align: center;
+        font-size: 2.5em;
+        font-weight: 800;
+        color: #0369a1;
+        margin: 15px 0;
+      }
+
+      .cost-breakdown-container {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 25px;
+        margin: 25px 0;
+      }
+
+      .cost-category {
+        background: white;
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 20px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+      }
+
+      .cost-category:hover {
+        border-color: #0369a1;
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(3, 105, 161, 0.15);
+      }
+
+      .cost-category.active {
+        border-color: #0369a1;
+        background: linear-gradient(135deg, #f0f9ff, #ffffff);
+      }
+
+      .cost-category h4 {
+        color: #0f172a;
+        margin-bottom: 10px;
+        font-size: 1.1em;
+      }
+
+      .cost-amount {
+        font-size: 2em;
+        font-weight: 800;
+        color: #0369a1;
+        margin: 10px 0;
+      }
+
+      .cost-details {
+        display: none;
+        margin-top: 15px;
+        padding-top: 15px;
+        border-top: 1px solid #e2e8f0;
+      }
+
+      .cost-details.active {
+        display: block;
+        animation: slideDown 0.3s ease-out;
+      }
+
+      @keyframes slideDown {
+        from {
+          opacity: 0;
+          transform: translateY(-10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .cost-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 0;
+        border-bottom: 1px solid #f1f5f9;
+        font-size: 0.9em;
+      }
+
+      .cost-item:last-child {
+        border-bottom: none;
+        font-weight: 600;
+        font-size: 1em;
+        color: #0f172a;
+      }
+
+      .total-cost-display {
+        text-align: center;
+        background: linear-gradient(135deg, #0369a1, #0284c7);
+        color: white;
+        padding: 25px;
+        border-radius: 12px;
+        margin: 25px 0;
+      }
+
+      .total-cost-display h3 {
+        margin-bottom: 10px;
+        border: none;
+        padding: 0;
+        color: white;
+      }
+
+      .total-monthly-cost {
+        font-size: 3em;
+        font-weight: 800;
+        margin: 10px 0;
+      }
+
+      .scale-indicator {
+        background: rgba(255, 255, 255, 0.2);
+        padding: 10px 15px;
+        border-radius: 8px;
+        margin-top: 15px;
+        font-size: 1.1em;
+        font-weight: 600;
+      }
+      @media (max-width: 768px) {
+        .slideshow-container {
+          padding: 15px;
+        }
+
+        .slide {
+          padding: 30px 25px;
+          width: 98%;
+          max-height: 92vh;
+        }
+
+        h1 {
+          font-size: 2.4em;
+        }
+
+        h1::after {
+          display: none;
+        }
+
+        h2 {
+          font-size: 1.8em;
+        }
+
+        h3 {
+          font-size: 1.2em;
+        }
+
+        .fact-grid {
+          grid-template-columns: 1fr;
+          gap: 20px;
+        }
+
+        .scale-comparison {
+          grid-template-columns: 1fr;
+        }
+
+        .architecture-diagram {
+          flex-direction: column;
+        }
+
+        .arrow {
+          transform: rotate(90deg);
+        }
+
+        .technical-list {
+          columns: 1;
+        }
+
+        .navigation-hint,
+        .slide-counter {
+          font-size: 0.8em;
+          padding: 8px 12px;
+        }
+
+        .cost-table {
+          font-size: 0.85em;
+        }
+
+        .cost-table th,
+        .cost-table td {
+          padding: 12px 15px;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .slideshow-container {
+          padding: 10px;
+        }
+
+        .slide {
+          padding: 20px 15px;
+        }
+
+        h1 {
+          font-size: 2em;
+        }
+
+        h2 {
+          font-size: 1.5em;
+        }
+
+        p,
+        li {
+          font-size: 0.95em;
+        }
+
+        .fact-card {
+          padding: 20px;
+        }
+
+        .cost-table {
+          font-size: 0.8em;
+        }
+
+        .cost-table th,
+        .cost-table td {
+          padding: 10px 12px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="slideshow-container">
+      <!-- Pacific patterns -->
+      <div class="pacific-pattern pattern-1"></div>
+      <div class="pacific-pattern pattern-2"></div>
+      <div class="pacific-pattern pattern-3"></div>
+
+      <!-- Slide 0: Executive Summary -->
+      <div class="slide">
+        <div class="oca-title">
+          <div class="oca-badge">🌺 Executive Summary • 60 Second Overview</div>
+          <h1>Smart Apprentice LMS</h1>
+          <div class="oca-subtitle">Production Deployment - Key Facts</div>
+        </div>
+
+        <div class="fact-grid">
+          <div class="fact-card">
+            <h4>Current Status</h4>
+            <p>
+              <strong>ALPHA stage:</strong> Functional but contains bugs. Ready
+              for limited production deployment.
+            </p>
+          </div>
+          <div class="fact-card">
+            <h4>Immediate Cost</h4>
+            <p>
+              <strong>$70/month</strong> to start serving our first 1,000
+              Pacific community learners.
+            </p>
+          </div>
+          <div class="fact-card">
+            <h4>Growth Ready</h4>
+            <p>
+              <strong>Scales to 50,000 users</strong> at $1,164/month when we
+              reach full capacity.
+            </p>
+          </div>
+          <div class="fact-card">
+            <h4>Timeline</h4>
+            <p>
+              <strong>4-8 weeks</strong> from approval to live system for OCA
+              students.
+            </p>
+          </div>
+        </div>
+
+        <div class="info-box">
+          <h3>Bottom Line</h3>
+          <p>
+            Our Smart Apprentice LMS is ready for production. Starting cost is
+            $70/month, growing predictably with our student base. System will
+            have alpha-stage bugs initially but provides immediate value to our
+            Pacific whānau.
+          </p>
+        </div>
+
+        <div class="warning-box">
+          <h3>Key Decision Required</h3>
+          <p>
+            Approve $70/month operating budget and 4-8 week deployment timeline
+            to begin serving our Pasifika community with world-class digital
+            learning platform.
+          </p>
+        </div>
+
+        <div class="pasifika-note">
+          🌊 Building Tomorrow's Workforce Today • Ready to empower our Pacific
+          learners
+        </div>
+      </div>
+
+      <!-- Slide 1: Title -->
+      <div class="slide active">
+        <div class="oca-title">
+          <div class="oca-badge">🌺 Oceania Career Academy • Kia Ora</div>
+          <h1>Smart Apprentice LMS</h1>
+          <div class="oca-subtitle">Production Deployment Analysis</div>
+        </div>
+        <div class="info-box">
+          <h3>Current Status</h3>
+          <p>
+            System is in ALPHA stage - functional but will contain bugs and
+            require ongoing fixes. This presentation outlines production
+            deployment requirements and realistic costs.
+          </p>
+        </div>
+        <div class="fact-grid">
+          <div class="fact-card">
+            <h4>Backend Status</h4>
+            <p>
+              Go API with 33+ database migrations, all core features implemented
+              for our Pasifika community
+            </p>
+          </div>
+          <div class="fact-card">
+            <h4>Frontend Status</h4>
+            <p>
+              Expo React Native app, currently in development/testing with OCA
+              branding
+            </p>
+          </div>
+        </div>
+        <div class="pasifika-note">
+          🌊 Building Tomorrow's Workforce Today • For our Pacific whānau
+        </div>
+      </div>
+
+      <!-- Slide 2: Technical Architecture -->
+      <div class="slide">
+        <h2>System Architecture</h2>
+        <div class="architecture-diagram">
+          <div class="arch-box">
+            <h4>Mobile App</h4>
+            <p>Expo React Native<br />iOS & Android</p>
+          </div>
+          <div class="arrow">→</div>
+          <div class="arch-box">
+            <h4>Backend API</h4>
+            <p>Go Server<br />DigitalOcean</p>
+          </div>
+          <div class="arrow">→</div>
+          <div class="arch-box">
+            <h4>Database</h4>
+            <p>PostgreSQL<br />Managed DB</p>
+          </div>
+        </div>
+
+        <h3>File Storage for Student Evidence Photos</h3>
+        <div class="fact-grid">
+          <div class="fact-card">
+            <h4>Storage Location</h4>
+            <p>
+              Photos stored on DigitalOcean server filesystem in
+              /uploads/evidence/ directory
+            </p>
+          </div>
+          <div class="fact-card">
+            <h4>Image Processing</h4>
+            <p>
+              Automatic compression to 85% quality, max 1200px width to save
+              storage space
+            </p>
+          </div>
+          <div class="fact-card">
+            <h4>File Formats</h4>
+            <p>
+              Supports JPEG, JPG, PNG - all converted to JPEG for consistency
+            </p>
+          </div>
+          <div class="fact-card">
+            <h4>Security</h4>
+            <p>
+              Authentication required, filename validation to prevent directory
+              traversal
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 3: Current Alpha Issues -->
+      <div class="slide">
+        <h2>Alpha Stage Reality</h2>
+        <div class="warning-box">
+          <h3>Expected Issues in Alpha</h3>
+          <p>
+            As an alpha system, users will encounter bugs and incomplete
+            features that require ongoing development.
+          </p>
+        </div>
+
+        <h3>Known Alpha Limitations</h3>
+        <ul class="technical-list">
+          <li>User interface may have usability issues</li>
+          <li>Data validation may miss edge cases</li>
+          <li>File upload failures under certain conditions</li>
+          <li>Performance issues under load</li>
+          <li>Email notifications may be unreliable</li>
+          <li>Mobile app may crash with specific user actions</li>
+          <li>Database queries may timeout with large datasets</li>
+          <li>Authentication tokens may expire unexpectedly</li>
+          <li>Image compression may fail for certain file types</li>
+          <li>Backup and recovery procedures untested</li>
+        </ul>
+
+        <div class="info-box">
+          <h3>Development Resources Needed</h3>
+          <p>
+            Expect to dedicate ongoing development time for bug fixes, user
+            feedback implementation, and system stabilization for our Pacific
+            community.
+          </p>
+        </div>
+      </div>
+
+      <!-- Slide 4: Hosting Costs - Current Scale -->
+      <div class="slide">
+        <h2>Production Costs - Small Scale (0-1000 users)</h2>
+
+        <h3>Backend Hosting (DigitalOcean)</h3>
+        <table class="cost-table">
+          <thead>
+            <tr>
+              <th>Service</th>
+              <th>Specifications</th>
+              <th>Monthly Cost</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>App Platform (Basic XXS)</td>
+              <td>512MB RAM, 1 vCPU, 100GB bandwidth</td>
+              <td>$5.00</td>
+            </tr>
+            <tr>
+              <td>PostgreSQL Database (Basic)</td>
+              <td>1GB RAM, 10GB storage, automated backups</td>
+              <td>$15.00</td>
+            </tr>
+            <tr>
+              <td>Additional Storage (50GB)</td>
+              <td>For user photos and evidence files</td>
+              <td>$5.00</td>
+            </tr>
+            <tr>
+              <td><strong>Backend Subtotal</strong></td>
+              <td></td>
+              <td><strong>$25.00</strong></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Frontend Hosting (Expo)</h3>
+        <table class="cost-table">
+          <thead>
+            <tr>
+              <th>Service</th>
+              <th>Specifications</th>
+              <th>Monthly Cost</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>EAS Production Plan</td>
+              <td>App builds, updates, 100,000 MAU</td>
+              <td>$29.00</td>
+            </tr>
+            <tr>
+              <td>EAS Hosting (Preview)</td>
+              <td>Web version hosting (currently free)</td>
+              <td>$0.00</td>
+            </tr>
+            <tr>
+              <td><strong>Frontend Subtotal</strong></td>
+              <td></td>
+              <td><strong>$29.00</strong></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="info-box">
+          <h3>Total Monthly Cost: $54.00</h3>
+          <p>
+            Plus additional costs for email service (~$10-20/month) and domain
+            name (~$12/year)
+          </p>
+        </div>
+      </div>
+
+      <!-- Slide 4.5: Interactive Cost Calculator -->
+      <div class="slide">
+        <h2>Interactive Cost Calculator</h2>
+
+        <div class="cost-calculator">
+          <div class="calculator-header">
+            <h3>Calculate Costs by User Count</h3>
+            <p>Move the slider to see costs at different scales</p>
+          </div>
+
+          <div class="user-slider-container">
+            <div class="current-users">
+              <span id="current-user-count">1,000</span> users
+            </div>
+            <input
+              type="range"
+              min="100"
+              max="50000"
+              value="1000"
+              class="user-slider"
+              id="userSlider"
+              step="100"
+            />
+            <div class="slider-labels">
+              <span>100 users</span>
+              <span>25,000</span>
+              <span>50,000 users</span>
+            </div>
+          </div>
+
+          <div class="cost-breakdown-container">
+            <div
+              class="cost-category"
+              id="backend-category"
+              onclick="toggleCostDetails('backend')"
+            >
+              <h4>Backend Hosting</h4>
+              <div class="cost-amount" id="backend-cost">$25.00</div>
+              <p>DigitalOcean infrastructure</p>
+              <div class="cost-details" id="backend-details">
+                <div class="cost-item">
+                  <span>App Platform</span>
+                  <span id="backend-app-cost">$5.00</span>
+                </div>
+                <div class="cost-item">
+                  <span>Database</span>
+                  <span id="backend-db-cost">$15.00</span>
+                </div>
+                <div class="cost-item">
+                  <span>Storage</span>
+                  <span id="backend-storage-cost">$5.00</span>
+                </div>
+                <div class="cost-item">
+                  <span>Load Balancer</span>
+                  <span id="backend-lb-cost">$0.00</span>
+                </div>
+                <div class="cost-item">
+                  <span>CDN & Monitoring</span>
+                  <span id="backend-extras-cost">$0.00</span>
+                </div>
+                <div class="cost-item">
+                  <strong>Subtotal</strong>
+                  <strong id="backend-subtotal">$25.00</strong>
+                </div>
+              </div>
+            </div>
+
+            <div
+              class="cost-category"
+              id="frontend-category"
+              onclick="toggleCostDetails('frontend')"
+            >
+              <h4>Frontend Hosting</h4>
+              <div class="cost-amount" id="frontend-cost">$29.00</div>
+              <p>Expo app platform</p>
+              <div class="cost-details" id="frontend-details">
+                <div class="cost-item">
+                  <span>EAS Production Plan</span>
+                  <span id="frontend-eas-cost">$29.00</span>
+                </div>
+                <div class="cost-item">
+                  <span>Update Overages</span>
+                  <span id="frontend-updates-cost">$0.00</span>
+                </div>
+                <div class="cost-item">
+                  <span>Additional Bandwidth</span>
+                  <span id="frontend-bandwidth-cost">$0.00</span>
+                </div>
+                <div class="cost-item">
+                  <strong>Subtotal</strong>
+                  <strong id="frontend-subtotal">$29.00</strong>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="total-cost-display">
+            <h3>Total Monthly Cost</h3>
+            <div class="total-monthly-cost" id="total-monthly-cost">$70.00</div>
+            <div class="scale-indicator" id="scale-indicator">
+              Small Scale - Perfect for Alpha Launch
+            </div>
+          </div>
+        </div>
+
+        <div class="info-box">
+          <h3>Additional Costs to Consider</h3>
+          <p>
+            Email service (~$10-20/month), domain name (~$12/year), and
+            development team costs as user base grows.
+          </p>
+        </div>
+      </div>
+
+      <!-- Slide 5: Scaling to 50,000 Users -->
+      <div class="slide">
+        <h2>Scaling Costs - 50,000 Active Users</h2>
+
+        <div class="warning-box">
+          <h3>Infrastructure Requirements for 50,000 Users</h3>
+          <p>
+            At this scale, significant architecture changes and additional
+            services will be required.
+          </p>
+        </div>
+
+        <h3>Backend Scaling (DigitalOcean)</h3>
+        <table class="cost-table">
+          <thead>
+            <tr>
+              <th>Service</th>
+              <th>Specifications</th>
+              <th>Monthly Cost</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>App Platform (Professional)</td>
+              <td>8GB RAM, 4 vCPU, multiple instances</td>
+              <td>$200.00</td>
+            </tr>
+            <tr>
+              <td>PostgreSQL Database (Business)</td>
+              <td>16GB RAM, 400GB storage, 3-node cluster</td>
+              <td>$540.00</td>
+            </tr>
+            <tr>
+              <td>CDN + Object Storage</td>
+              <td>1TB storage for images, global CDN</td>
+              <td>$50.00</td>
+            </tr>
+            <tr>
+              <td>Load Balancer</td>
+              <td>High availability, SSL termination</td>
+              <td>$10.00</td>
+            </tr>
+            <tr>
+              <td>Monitoring & Backups</td>
+              <td>Advanced monitoring, automated backups</td>
+              <td>$25.00</td>
+            </tr>
+            <tr>
+              <td>Bandwidth Overage</td>
+              <td>~2TB/month at $0.02/GB</td>
+              <td>$40.00</td>
+            </tr>
+            <tr>
+              <td><strong>Backend Subtotal</strong></td>
+              <td></td>
+              <td><strong>$865.00</strong></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Frontend Scaling (Expo)</h3>
+        <table class="cost-table">
+          <thead>
+            <tr>
+              <th>Service</th>
+              <th>Specifications</th>
+              <th>Monthly Cost</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>EAS Enterprise Plan</td>
+              <td>Unlimited builds, priority support</td>
+              <td>$99.00</td>
+            </tr>
+            <tr>
+              <td>EAS Update Overage</td>
+              <td>50,000 MAU beyond base plan</td>
+              <td>$150.00</td>
+            </tr>
+            <tr>
+              <td>Additional Bandwidth</td>
+              <td>High-volume update distribution</td>
+              <td>$50.00</td>
+            </tr>
+            <tr>
+              <td><strong>Frontend Subtotal</strong></td>
+              <td></td>
+              <td><strong>$299.00</strong></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="warning-box">
+          <h3>Total Monthly Cost at 50,000 Users: $1,164.00</h3>
+          <p>
+            Plus email service (~$50/month), support staff, and development team
+            costs
+          </p>
+        </div>
+      </div>
+
+      <!-- Slide 6: Cost Comparison Scale -->
+      <div class="slide">
+        <h2>Cost Scaling Overview</h2>
+
+        <div class="scale-comparison">
+          <div class="scale-card current">
+            <h4>Current (Alpha)</h4>
+            <p><strong>0-100 users</strong></p>
+            <p>$54/month</p>
+            <p>Basic infrastructure</p>
+          </div>
+          <div class="scale-card">
+            <h4>Growth Phase</h4>
+            <p><strong>1,000-10,000 users</strong></p>
+            <p>$200-400/month</p>
+            <p>Enhanced performance</p>
+          </div>
+          <div class="scale-card future">
+            <h4>Enterprise Scale</h4>
+            <p><strong>50,000 users</strong></p>
+            <p>$1,164/month</p>
+            <p>Full enterprise setup</p>
+          </div>
+        </div>
+
+        <h3>Additional Costs at Scale</h3>
+        <div class="fact-grid">
+          <div class="fact-card">
+            <h4>Development Team</h4>
+            <p>
+              $15,000-30,000/month for full-time developers to handle bugs and
+              features
+            </p>
+          </div>
+          <div class="fact-card">
+            <h4>Customer Support</h4>
+            <p>$5,000-10,000/month for support staff to handle user issues</p>
+          </div>
+          <div class="fact-card">
+            <h4>Quality Assurance</h4>
+            <p>$3,000-8,000/month for testing and bug detection</p>
+          </div>
+          <div class="fact-card">
+            <h4>Legal & Compliance</h4>
+            <p>
+              $2,000-5,000/month for data protection and educational compliance
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 7: Technical Requirements -->
+      <div class="slide">
+        <h2>Technical Requirements</h2>
+
+        <h3>Immediate Production Setup</h3>
+        <div class="fact-grid">
+          <div class="fact-card">
+            <h4>DigitalOcean Account</h4>
+            <p>
+              Business account with payment method, $200 initial credit
+              available
+            </p>
+          </div>
+          <div class="fact-card">
+            <h4>Domain Name</h4>
+            <p>
+              Professional domain (e.g., smartapprentice.oca.edu) - $10-15/year
+            </p>
+          </div>
+          <div class="fact-card">
+            <h4>Expo Developer Account</h4>
+            <p>Production plan required for app store deployment</p>
+          </div>
+          <div class="fact-card">
+            <h4>Email Service</h4>
+            <p>SendGrid, Mailgun, or similar for system notifications</p>
+          </div>
+        </div>
+
+        <h3>Required Ongoing Maintenance</h3>
+        <ul class="technical-list">
+          <li>Daily monitoring of error logs</li>
+          <li>Weekly security updates</li>
+          <li>Monthly performance optimization</li>
+          <li>Database maintenance and optimization</li>
+          <li>Mobile app updates via Expo</li>
+          <li>User support and bug triage</li>
+          <li>Content moderation for user uploads</li>
+          <li>Data backup verification</li>
+          <li>SSL certificate renewal</li>
+          <li>Dependency updates and security patches</li>
+        </ul>
+      </div>
+
+      <!-- Slide 8: Deployment Timeline -->
+      <div class="slide">
+        <h2>Deployment Timeline</h2>
+
+        <div class="info-box">
+          <h3>Realistic Production Timeline</h3>
+          <p>
+            From approval to live system deployment for our Pacific community
+          </p>
+        </div>
+
+        <h3>Phase 1: Infrastructure Setup (1-2 weeks)</h3>
+        <ul>
+          <li>Create DigitalOcean and Expo accounts</li>
+          <li>Configure production databases</li>
+          <li>Set up domain and SSL certificates</li>
+          <li>Configure email services</li>
+          <li>Deploy backend API</li>
+        </ul>
+
+        <h3>Phase 2: Mobile App Deployment (1-2 weeks)</h3>
+        <ul>
+          <li>Build production Expo app with OCA branding</li>
+          <li>Submit to Apple App Store (7-14 day review)</li>
+          <li>Submit to Google Play Store (1-3 day review)</li>
+          <li>Configure app update mechanisms</li>
+        </ul>
+
+        <h3>Phase 3: Testing & Bug Fixes (2-4 weeks)</h3>
+        <ul>
+          <li>Load testing with realistic user scenarios</li>
+          <li>Bug identification and priority assignment</li>
+          <li>Critical bug fixes</li>
+          <li>Performance optimization</li>
+          <li>User acceptance testing with Pacific community</li>
+        </ul>
+
+        <div class="warning-box">
+          <h3>Total Timeline: 4-8 weeks</h3>
+          <p>Assumes no major technical issues discovered during testing</p>
+        </div>
+      </div>
+
+      <!-- Slide 9: Risk Assessment -->
+      <div class="slide">
+        <h2>Risk Assessment</h2>
+
+        <h3>Technical Risks</h3>
+        <div class="fact-grid">
+          <div class="fact-card">
+            <h4>Alpha Stability</h4>
+            <p>
+              System will have bugs affecting user experience and requiring
+              immediate fixes
+            </p>
+          </div>
+          <div class="fact-card">
+            <h4>Scaling Issues</h4>
+            <p>
+              Performance problems may emerge as user base grows beyond testing
+              levels
+            </p>
+          </div>
+          <div class="fact-card">
+            <h4>Data Loss Risk</h4>
+            <p>Untested backup/recovery procedures could result in data loss</p>
+          </div>
+          <div class="fact-card">
+            <h4>Security Vulnerabilities</h4>
+            <p>
+              Production environment may expose security issues not found in
+              development
+            </p>
+          </div>
+        </div>
+
+        <h3>Business Risks</h3>
+        <div class="fact-grid">
+          <div class="fact-card">
+            <h4>User Experience</h4>
+            <p>
+              Alpha bugs could frustrate Pacific community users and damage OCA
+              reputation
+            </p>
+          </div>
+          <div class="fact-card">
+            <h4>Cost Overruns</h4>
+            <p>
+              Unexpected usage patterns could significantly increase monthly
+              costs
+            </p>
+          </div>
+          <div class="fact-card">
+            <h4>Compliance Issues</h4>
+            <p>
+              Educational data handling requirements may not be fully
+              implemented
+            </p>
+          </div>
+          <div class="fact-card">
+            <h4>Support Burden</h4>
+            <p>Alpha issues will generate high support ticket volume</p>
+          </div>
+        </div>
+
+        <div class="warning-box">
+          <h3>Recommendation</h3>
+          <p>
+            Consider limited beta release with selected Pacific community
+            members before full production launch to identify and fix critical
+            issues.
+          </p>
+        </div>
+      </div>
+
+      <!-- Slide 10: Decision Summary -->
+      <div class="slide">
+        <h2>Production Decision Summary</h2>
+
+        <h3>Current Situation</h3>
+        <ul>
+          <li>Smart Apprentice LMS is functional but in alpha stage</li>
+          <li>Will contain bugs and require ongoing development</li>
+          <li>Backend and frontend components ready for basic deployment</li>
+          <li>Student photo evidence system implemented with file storage</li>
+          <li>Designed for our Pasifika community at OCA</li>
+        </ul>
+
+        <h3>Immediate Costs</h3>
+        <table class="cost-table">
+          <thead>
+            <tr>
+              <th>Component</th>
+              <th>Monthly Cost</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Backend Hosting (DigitalOcean)</td>
+              <td>$25.00</td>
+            </tr>
+            <tr>
+              <td>Frontend Hosting (Expo)</td>
+              <td>$29.00</td>
+            </tr>
+            <tr>
+              <td>Email Service</td>
+              <td>$15.00</td>
+            </tr>
+            <tr>
+              <td>Domain & SSL</td>
+              <td>$1.00</td>
+            </tr>
+            <tr>
+              <td><strong>Total Monthly Operating Cost</strong></td>
+              <td><strong>$70.00</strong></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Growth Projections</h3>
+        <ul>
+          <li>1,000 users: ~$200-400/month</li>
+          <li>10,000 users: ~$600-800/month</li>
+          <li>50,000 users: ~$1,164/month + staff costs</li>
+        </ul>
+
+        <div class="info-box">
+          <h3>Next Steps if Approved</h3>
+          <p>
+            1. Set up hosting accounts<br />
+            2. Deploy to production environment<br />
+            3. Begin alpha testing with limited Pacific community group<br />
+            4. Allocate development resources for bug fixes
+          </p>
+        </div>
+
+        <div class="pasifika-note">
+          🌊 Ready to empower our Pacific whānau with world-class vocational
+          education • Fa'afetai
+        </div>
+      </div>
+    </div>
+
+    <!-- Navigation hints -->
+    <div class="navigation-hint">Use arrow keys ← → to navigate</div>
+
+    <div class="slide-counter">
+      <span id="current-slide">1</span> / <span id="total-slides">10</span>
+    </div>
+
+    <script>
+      let currentSlide = 0;
+      const slides = document.querySelectorAll(".slide");
+      const totalSlides = slides.length;
+
+      document.getElementById("total-slides").textContent = totalSlides;
+
+      // Cost calculator functionality
+      const userSlider = document.getElementById("userSlider");
+      const userCountDisplay = document.getElementById("current-user-count");
+
+      // Cost calculation functions
+      function calculateBackendCosts(users) {
+        let appCost, dbCost, storageCost, lbCost, extrasCost;
+
+        if (users <= 1000) {
+          appCost = 5;
+          dbCost = 15;
+          storageCost = 5;
+          lbCost = 0;
+          extrasCost = 0;
+        } else if (users <= 5000) {
+          appCost = 25;
+          dbCost = 50;
+          storageCost = 15;
+          lbCost = 10;
+          extrasCost = 15;
+        } else if (users <= 15000) {
+          appCost = 80;
+          dbCost = 180;
+          storageCost = 30;
+          lbCost = 10;
+          extrasCost = 25;
+        } else if (users <= 30000) {
+          appCost = 150;
+          dbCost = 350;
+          storageCost = 40;
+          lbCost = 10;
+          extrasCost = 35;
+        } else {
+          appCost = 200;
+          dbCost = 540;
+          storageCost = 50;
+          lbCost = 10;
+          extrasCost = 65;
+        }
+
+        return {
+          app: appCost,
+          database: dbCost,
+          storage: storageCost,
+          loadBalancer: lbCost,
+          extras: extrasCost,
+          total: appCost + dbCost + storageCost + lbCost + extrasCost,
+        };
+      }
+
+      function calculateFrontendCosts(users) {
+        let easCost, updatesCost, bandwidthCost;
+
+        if (users <= 5000) {
+          easCost = 29;
+          updatesCost = 0;
+          bandwidthCost = 0;
+        } else if (users <= 15000) {
+          easCost = 99;
+          updatesCost = 25;
+          bandwidthCost = 10;
+        } else if (users <= 30000) {
+          easCost = 99;
+          updatesCost = 75;
+          bandwidthCost = 25;
+        } else {
+          easCost = 99;
+          updatesCost = 150;
+          bandwidthCost = 50;
+        }
+
+        return {
+          eas: easCost,
+          updates: updatesCost,
+          bandwidth: bandwidthCost,
+          total: easCost + updatesCost + bandwidthCost,
+        };
+      }
+
+      function getScaleDescription(users) {
+        if (users <= 1000) {
+          return "Small Scale - Perfect for Alpha Launch";
+        } else if (users <= 5000) {
+          return "Growth Phase - Enhanced Infrastructure";
+        } else if (users <= 15000) {
+          return "Medium Scale - Professional Setup";
+        } else if (users <= 30000) {
+          return "Large Scale - Enterprise Features";
+        } else {
+          return "Enterprise Scale - Full Production Setup";
+        }
+      }
+
+      function updateCostCalculator() {
+        const users = parseInt(userSlider.value);
+        userCountDisplay.textContent = users.toLocaleString();
+
+        const backendCosts = calculateBackendCosts(users);
+        const frontendCosts = calculateFrontendCosts(users);
+        const totalCost = backendCosts.total + frontendCosts.total + 16; // +16 for email/domain
+
+        // Update backend costs
+        document.getElementById(
+          "backend-app-cost"
+        ).textContent = `${backendCosts.app}.00`;
+        document.getElementById(
+          "backend-db-cost"
+        ).textContent = `${backendCosts.database}.00`;
+        document.getElementById(
+          "backend-storage-cost"
+        ).textContent = `${backendCosts.storage}.00`;
+        document.getElementById(
+          "backend-lb-cost"
+        ).textContent = `${backendCosts.loadBalancer}.00`;
+        document.getElementById(
+          "backend-extras-cost"
+        ).textContent = `${backendCosts.extras}.00`;
+        document.getElementById(
+          "backend-subtotal"
+        ).textContent = `${backendCosts.total}.00`;
+        document.getElementById(
+          "backend-cost"
+        ).textContent = `${backendCosts.total}.00`;
+
+        // Update frontend costs
+        document.getElementById(
+          "frontend-eas-cost"
+        ).textContent = `${frontendCosts.eas}.00`;
+        document.getElementById(
+          "frontend-updates-cost"
+        ).textContent = `${frontendCosts.updates}.00`;
+        document.getElementById(
+          "frontend-bandwidth-cost"
+        ).textContent = `${frontendCosts.bandwidth}.00`;
+        document.getElementById(
+          "frontend-subtotal"
+        ).textContent = `${frontendCosts.total}.00`;
+        document.getElementById(
+          "frontend-cost"
+        ).textContent = `${frontendCosts.total}.00`;
+
+        // Update total cost
+        document.getElementById(
+          "total-monthly-cost"
+        ).textContent = `${totalCost}.00`;
+        document.getElementById("scale-indicator").textContent =
+          getScaleDescription(users);
+      }
+
+      function toggleCostDetails(category) {
+        const details = document.getElementById(category + "-details");
+        const categoryEl = document.getElementById(category + "-category");
+
+        // Close other details
+        document.querySelectorAll(".cost-details").forEach((detail) => {
+          if (detail.id !== category + "-details") {
+            detail.classList.remove("active");
+          }
+        });
+
+        document.querySelectorAll(".cost-category").forEach((cat) => {
+          if (cat.id !== category + "-category") {
+            cat.classList.remove("active");
+          }
+        });
+
+        // Toggle current details
+        details.classList.toggle("active");
+        categoryEl.classList.toggle("active");
+      }
+
+      // Make functions global for onclick handlers
+      window.toggleCostDetails = toggleCostDetails;
+
+      if (userSlider) {
+        userSlider.addEventListener("input", updateCostCalculator);
+        updateCostCalculator(); // Initial calculation
+      }
+
+      function showSlide(index) {
+        slides.forEach((slide, i) => {
+          slide.classList.toggle("active", i === index);
+        });
+        document.getElementById("current-slide").textContent = index + 1;
+      }
+
+      function nextSlide() {
+        currentSlide = (currentSlide + 1) % totalSlides;
+        showSlide(currentSlide);
+      }
+
+      function prevSlide() {
+        currentSlide = (currentSlide - 1 + totalSlides) % totalSlides;
+        showSlide(currentSlide);
+      }
+
+      // Keyboard navigation
+      document.addEventListener("keydown", function (event) {
+        if (event.key === "ArrowRight" || event.key === " ") {
+          event.preventDefault();
+          nextSlide();
+        } else if (event.key === "ArrowLeft") {
+          event.preventDefault();
+          prevSlide();
+        }
+      });
+
+      // Remove click navigation - it interferes with interactive elements
+      // Click navigation removed to allow interactive elements to work properly
+
+      // Touch navigation for mobile
+      let startX = 0;
+      let endX = 0;
+
+      document.addEventListener("touchstart", function (event) {
+        startX = event.changedTouches[0].screenX;
+      });
+
+      document.addEventListener("touchend", function (event) {
+        endX = event.changedTouches[0].screenX;
+        handleGesture();
+      });
+
+      function handleGesture() {
+        if (endX < startX - 50) {
+          nextSlide(); // Swipe left - next slide
+        }
+        if (endX > startX + 50) {
+          prevSlide(); // Swipe right - previous slide
+        }
+      }
+
+      // Initialize
+      showSlide(0);
+
+      // Add floating animation to cards
+      document
+        .querySelectorAll(".fact-card, .arch-box, .scale-card")
+        .forEach((card, index) => {
+          card.style.animationDelay = `${index * 0.1}s`;
+        });
+
+      // Pacific wave animation
+      const patterns = document.querySelectorAll(".pacific-pattern");
+      patterns.forEach((pattern, index) => {
+        pattern.style.animationDelay = `${index * 2}s`;
+      });
+    </script>
+  </body>
+</html>
